@@ -6,4 +6,4 @@ dependencies:
   - matplotlib
   - qutip
   - pip:
-    - qiskit[visualization]
+    - qiskit
