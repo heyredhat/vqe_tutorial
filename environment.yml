@@ -1,0 +1,9 @@
+name: vqe
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - matplotlib
+  - qutip
+  - pip:
+    - qiskit[visualization]
