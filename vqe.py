@@ -9,8 +9,11 @@ from qiskit import QuantumCircuit, execute
 from qiskit import Aer, IBMQ, transpile
 from qiskit.providers.ibmq.managed import IBMQJobManager
 
+#IBMQ.save_account('YOUR_TOKEN')
+
+##############################################################################
+
 if __name__ == "__main__":
-    ##############################################################################
 
     # For each Pauli string of the form "XIXXY", of length n,
     # construct the tensor product of the corresponding
@@ -44,7 +47,13 @@ if __name__ == "__main__":
     samples = 60
     n_shots = 4096
     local = True
-    backend_name = "ibmq_qasm_simulator" 
+    backend_name = "ibmq_5_yorktown" # "ibmq_16_melbourne" 
+
+    def help():
+        print("Usage: python vqe.py --samples 60 --n_shots 4096 --quantum/--classical/--backend <name>")
+        print("Make sure to fill in your token!")
+        sys.exit()         
+
     for i, arg in enumerate(sys.argv):
         try:
             if arg == "--samples":
@@ -56,13 +65,16 @@ if __name__ == "__main__":
                 backend_name = arg
             if arg == "--quantum":
                 local = False
-                backend_name = "ibmq_vigo" #"ibmq_5_yorktown", "ibmq_16_melbourne" 
+                backend_name = "ibmq_vigo"
             if arg == "--classical":
                 local = False
                 backed_name = "ibmq_qasm_simulator"
+            if arg == "--help":   
+                raise   
         except:
-            print("Usage: python vqe.py --samples 60 --n_shots 4096 --quantum/--classical/--backend <name>")
-            sys.exit()
+            help()
+
+    ##############################################################################
 
     print("our matrix:")
     H = qt.Qobj(np.array([[1,0,0,0],\
@@ -101,12 +113,12 @@ if __name__ == "__main__":
         backend = provider.get_backend(backend_name)
 
     print("laying out circuits...")
-    circs = []
-    circ_indices = []
     # Creates circuits: for each theta, we run through all the operators 
     # in the Pauli decomposition, and create a circuit for each one
     # that starts with the ansatz, then consists of pre-measurement
     # rotations on each of the qubits, and then a full measurement.
+    circs = []
+    circ_indices = []
     thetas = np.linspace(0, 2*np.pi, samples)
     for t in thetas:
         for n, v in H_pauli.items():
@@ -121,7 +133,7 @@ if __name__ == "__main__":
                 circs.append(circ)
                 circ_indices.append((t, n))
 
-    print("evaluating...")
+    print("evaluating...\n")
     # We optimize the circuits, and send them off to be evaluated.
     circs = transpile(circs, backend=backend)
     jb = execute(circs, backend, shots=n_shots) if local \
@@ -156,8 +168,7 @@ if __name__ == "__main__":
         expectation_values.append(e)
     min_result = np.argmin(expectation_values)
     final_theta = thetas[min_result]
-    print("\nfinal_theta: %.4f" % final_theta)
-    print("<H> = %.4f" % expectation_values[min_result])
+    print("\nfinal_theta: %.4f, <H> = %.4f" % (final_theta, expectation_values[min_result]))
 
     # Use a statevector simulator to look at our final state.
     state_backend = Aer.get_backend('statevector_simulator')
