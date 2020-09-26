@@ -9,9 +9,7 @@ from qiskit import QuantumCircuit, execute
 from qiskit import Aer, IBMQ, transpile
 from qiskit.providers.ibmq.managed import IBMQJobManager
 
-# Uncomment for non-local use.
-#if not IBMQ.active_account():
-#    IBMQ.enable_account('YOUR_TOKEN')
+#IBMQ.save_account('YOUR_TOKEN')
 
 ##############################################################################
 
